@@ -1,5 +1,7 @@
 // the voronoi diagram (a set of edges) for a set of points (sites)
 
+import vendor.StdDraw;
+
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.ArrayList;
@@ -284,14 +286,46 @@ public class Voronoi {
 		double c1 = (p.x*p.x + p.y*p.y - ycurr*ycurr)/dp;
 		return (a1*x*x + b1*x + c1);
 	}
+
+	private List<Point> lloydRelaxation(){
+		List<Point> relaxed = new ArrayList<>();
+		List<Point> region = new ArrayList<>();
+
+		for(Point p : sites){
+			for(Edge e: edges){
+				if(e.site_left.equals(p) || e.site_right.equals(p)){
+					if(!region.contains(e.end))
+						region.add(e.end);
+					if(!region.contains(e.start))
+						region.add(e.start);
+				}
+			}
+			int n = 0;
+			Point res = new Point(0,0);
+
+			for(Point r : region){
+				res.x += r.x;
+				res.y += r.y;
+				n++;
+			}
+			if(res.x > 0 && res.y > 0){
+				res.x /= n;
+				res.y /= n;
+				relaxed.add(res);
+			}else relaxed.add(p);
+			region.clear();
+		}
+		return relaxed;
+
+	}
 	
 	// takes one command line arguement N
 	// draws Voronoi diagram of N randomly generated sites
 	public static void main(String[] args) {
 		
-		int N = Integer.parseInt(args[0]);
+		int N = 150;
 
-		Stopwatch s = new Stopwatch();
+		//Stopwatch s = new Stopwatch();
 
 		ArrayList<Point> points = new ArrayList<Point>();
 
@@ -303,21 +337,44 @@ public class Voronoi {
 			points.add(new Point(x, y));
 		}
 
-		double start = s.elapsedTime();
+		//double start = s.elapsedTime();
 		Voronoi diagram = new Voronoi (points);
-		double stop = s.elapsedTime();
+		//double stop = s.elapsedTime();
 
-		System.out.println(stop-start);
+		//System.out.println(stop-start);
 
 		// draw results
 		StdDraw.setPenRadius(.005);
-		for (Point p: points) {
+		for (Point p: diagram.sites) {
 			StdDraw.point(p.x, p.y);
 		}
 		StdDraw.setPenRadius(.002);
 		for (Edge e: diagram.edges) {
 			StdDraw.line(e.start.x, e.start.y, e.end.x, e.end.y);
 		}
-		
+
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
+		StdDraw.clear();
+
+		List<Point> n = new ArrayList<>();
+		for(int i = 0; i< 14; i++) {
+			n = diagram.lloydRelaxation();
+			diagram = new Voronoi(n);
+		}
+
+		// draw results
+		StdDraw.setPenRadius(.005);
+		for (Point p: diagram.sites) {
+			StdDraw.point(p.x, p.y);
+		}
+		StdDraw.setPenRadius(.002);
+		for (Edge e: diagram.edges) {
+			StdDraw.line(e.start.x, e.start.y, e.end.x, e.end.y);
+		}
 	}
 }

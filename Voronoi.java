@@ -323,7 +323,8 @@ public class Voronoi {
 	// draws Voronoi diagram of N randomly generated sites
 	public static void main(String[] args) {
 		
-		int N = 150;
+		int N = 300;
+		int lloydRounds = 1;
 
 		//Stopwatch s = new Stopwatch();
 
@@ -362,7 +363,7 @@ public class Voronoi {
 		StdDraw.clear();
 
 		List<Point> n = new ArrayList<>();
-		for(int i = 0; i< 14; i++) {
+		for(int i = 0; i< lloydRounds; i++) {
 			n = diagram.lloydRelaxation();
 			diagram = new Voronoi(n);
 		}
